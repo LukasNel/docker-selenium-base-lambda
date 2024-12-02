@@ -1,42 +1,81 @@
-# docker-selenium-lambda
+### Initialization
+```
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS ACCOUNT ID>.dkr.ecr.us-east-1.amazonaws.com
+aws ecr create-repository --repository-name hello-world --region us-east-1 --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
+```
+If successful, you see a response like this:
+```
+{
+    "repository": {
+        "repositoryArn": "arn:aws:ecr:us-east-1:111122223333:repository/hello-world",
+        "registryId": "111122223333",
+        "repositoryName": "hello-world",
+        "repositoryUri": "111122223333.dkr.ecr.us-east-1.amazonaws.com/hello-world",
+        "createdAt": "2023-03-09T10:39:01+00:00",
+        "imageTagMutability": "MUTABLE",
+        "imageScanningConfiguration": {
+            "scanOnPush": true
+        },
+        "encryptionConfiguration": {
+            "encryptionType": "AES256"
+        }
+    }
+}
+```
+Copy the repositoryUri from the output in the previous step.
 
-[![badge](https://github.com/umihico/docker-selenium-lambda/actions/workflows/demo-test.yml/badge.svg)](https://github.com/umihico/docker-selenium-lambda/actions/workflows/demo-test.yml)
-[![badge](https://github.com/umihico/docker-selenium-lambda/actions/workflows/auto-update.yml/badge.svg)](https://github.com/umihico/docker-selenium-lambda/actions/workflows/auto-update.yml)
+Then run:
+```
+docker tag docker-image:test <ECRrepositoryUri>:latest
+```
+Then run:
 
-This is minimum demo of headless chrome and selenium on container image on AWS Lambda
-
-This image goes with these versions. [These are automatically updated and tested everyday.](https://github.com/umihico/docker-selenium-lambda/actions)
-
-- Python 3.13.0
-- chromium 131.0.6778.85
-- chromedriver 131.0.6778.85
-- selenium 4.27.1
-
-## Running the demo
-
-```bash
-$ npm install -g serverless@^3 # skip this line if you have already installed Serverless Framework
-$ export AWS_REGION=ap-northeast-1 # You can specify region or skip this line. us-east-1 will be used by default.
-$ sls create --template-url "https://github.com/umihico/docker-selenium-lambda/tree/main" --path docker-selenium-lambda && cd $_
-$ sls deploy
-$ sls invoke --function demo # Yay! You will get texts of example.com
+```
+aws iam create-role \
+  --role-name lambda-ex \
+  --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
+```
+You should see the following output:
+```
+{
+    "Role": {
+        "Path": "/",
+        "RoleName": "lambda-ex",
+        "RoleId": "AROAQFOXMPL6TZ6ITKWND",
+        "Arn": "arn:aws:iam::123456789012:role/lambda-ex",
+        "CreateDate": "2020-01-17T23:19:12Z",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "lambda.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        }
+    }
+}
+```
+Then run the following, taking the arn from the previous step for the --role flag.
+```
+aws lambda create-function \
+  --function-name hello-world \
+  --package-type Image \
+  --code ImageUri=111122223333.dkr.ecr.us-east-1.amazonaws.com/hello-world:latest \
+  --role arn:aws:iam::111122223333:role/lambda-ex \
+  --memory-size 2048 \
+  --timeout 900 
 ```
 
-## Public image is available
+Wait around 60 seconds for the function to start, then run:
 
-If you want your image simpler and updated automatically, rewrite the Dockerfile with the following commands:
-
-```Dockerfile
-FROM umihico/aws-lambda-selenium-python:latest
-
-COPY main.py ./
-CMD [ "main.handler" ]
+```
+aws lambda invoke  --function-name hello-world --region us-east-1 response.json
 ```
 
-Available tags are listed [here](https://hub.docker.com/r/umihico/aws-lambda-selenium-python/tags)
+You should see a "Success" message.
 
-## Side Project
-
-Are you interested in **Node.js** or **Playwright**? Please check out [docker-playwright-lambda](https://github.com/umihico/docker-playwright-lambda)
-
-If you don't want to create functions each time for each purpose, Please check out [pythonista-chromeless](https://github.com/umihico/pythonista-chromeless)
+After you've created the repo above, modify run.sh to use the correct ecr repo, and then just run `./run.sh`

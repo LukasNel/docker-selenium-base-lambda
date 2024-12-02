@@ -1,9 +1,10 @@
 import os
 import os
 os.chdir("/tmp/")
+from contextlib import contextmanager
 
-
-def handler(event=None, context=None):
+@contextmanager
+def managed_driver():
     os.chdir("/tmp/")
     from seleniumbase import Driver
     import Xlib.display
@@ -28,16 +29,17 @@ def handler(event=None, context=None):
                 chromium_arg="--disable-dev-tools,--no-sandbox,--disable-dev-shm-usage,--no-zygote,--remote-debugging-port=9222",  
                 cap_string='{"browserVersion":"118.0.5993.70"}'  
             )
-        url = "https://gitlab.com/users/sign_in"
-        print("running lambda")
-
-        driver.uc_open_with_reconnect(url, 4)
-        print("running lambda")
-
-        # driver.uc_gui_click_captcha()
-        print("running lambda")
-
+        print("Initialised driver")
+        yield driver
         driver.quit()
+def handler(event=None, context=None):
+    os.chdir("/tmp/")
+    with managed_driver() as driver:
+        url = "https://gitlab.com/users/sign_in"
+        print("running uc_open_with_reconnect")
+        driver.uc_open_with_reconnect(url, 4)
+        # driver.uc_gui_click_captcha()
+        print("Success")
     return "Success"
 
 if __name__ == "__main__":
