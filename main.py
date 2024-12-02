@@ -28,6 +28,7 @@ def managed_driver_for_lambda():
                 chromium_arg="--disable-dev-tools,--no-sandbox,--disable-dev-shm-usage,--no-zygote,--remote-debugging-port=9222",  
                 cap_string='{"browserVersion":"118.0.5993.70"}'  
             )
+        driver._is_hidden = False
         print("Initialised driver")
         yield driver
         driver.quit()
@@ -36,9 +37,12 @@ def handler(event=None, context=None):
         url = "https://gitlab.com/users/sign_in"
         print("running uc_open_with_reconnect")
         driver.uc_open_with_reconnect(url, 4)
-        # driver.uc_gui_click_captcha()
+        print("running uc_gui_click")
+        driver.uc_gui_click_captcha()
         print("Success")
     return "Success"
 
 if __name__ == "__main__":
-    handler()
+    # This is to predownload the various dependencies
+    with managed_driver_for_lambda() as driver:
+        pass
