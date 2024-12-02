@@ -10,7 +10,6 @@ def managed_driver_for_lambda():
     from pyvirtualdisplay import Display
     with Display(visible=False, size=(100, 60),backend="xvfb", use_xauth=True) as disp:
         print("DISPLAY",os.environ['DISPLAY'])
-        # return os.environ['DISPLAY'] + " " + str(disp) + str(disp.is_alive())
         os.environ["DISPLAY"] = disp.new_display_var
         import pyautogui
         pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
@@ -32,6 +31,7 @@ def managed_driver_for_lambda():
         print("Initialised driver")
         yield driver
         driver.quit()
+
 def handler(event=None, context=None):
     with managed_driver_for_lambda() as driver:
         url = "https://gitlab.com/users/sign_in"
