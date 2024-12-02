@@ -78,4 +78,6 @@ aws lambda invoke  --function-name hello-world --region us-east-1 response.json
 
 You should see a "Success" message.
 
-After you've created the repo above, modify run.sh to use the correct ecr repo, and then just run `./run.sh`
+## Running the function
+
+After you've created the repo above, modify run.sh to use the correct ecr repo and role arn, and then just run `./run.sh`
