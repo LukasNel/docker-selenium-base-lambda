@@ -1,11 +1,7 @@
+from seleniumbase import Driver
 import os
-import os
-os.chdir("/tmp/")
-
 
 def handler(event=None, context=None):
-    os.chdir("/tmp/")
-    from seleniumbase import Driver
     import Xlib.display
     from pyvirtualdisplay import Display
     with Display(visible=False, size=(100, 60),backend="xvfb", use_xauth=True) as disp:
@@ -16,12 +12,12 @@ def handler(event=None, context=None):
         pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
         print("Initialised pyautogui")
         driver = Driver(
-                # undetectable=True,   
+                undetectable=True,   
                 binary_location='/opt/chrome/chrome',  
                 headless2=True,  
                 no_sandbox=True,
-                # remote_debug=True,  
-                # uc_cdp_events=False, 
+                remote_debug=True,  
+                uc_cdp_events=False, 
                 user_data_dir='/tmp/chrome-user-data',
                 # data_path='/tmp/chrome-data-path',
                 # disk_cache_dir='/tmp/chrome-disk-cache-dir',
