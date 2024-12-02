@@ -16,12 +16,12 @@ def managed_driver_for_lambda():
         pyautogui._pyautogui_x11._display = Xlib.display.Display(os.environ['DISPLAY'])
         print("Initialised pyautogui")
         driver = Driver(
-                # undetectable=True,   
+                undetectable=True,   
                 binary_location='/opt/chrome/chrome',  
                 headless2=True,  
                 no_sandbox=True,
                 # remote_debug=True,  
-                # uc_cdp_events=False, 
+                uc_cdp_events=False, 
                 user_data_dir='/tmp/chrome-user-data',
                 # data_path='/tmp/chrome-data-path',
                 # disk_cache_dir='/tmp/chrome-disk-cache-dir',
