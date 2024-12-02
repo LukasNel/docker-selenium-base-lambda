@@ -1,10 +1,9 @@
 import os
 import os
-os.chdir("/tmp/")
 from contextlib import contextmanager
 
 @contextmanager
-def managed_driver():
+def managed_driver_for_lambda():
     os.chdir("/tmp/")
     from seleniumbase import Driver
     import Xlib.display
@@ -33,8 +32,7 @@ def managed_driver():
         yield driver
         driver.quit()
 def handler(event=None, context=None):
-    os.chdir("/tmp/")
-    with managed_driver() as driver:
+    with managed_driver_for_lambda() as driver:
         url = "https://gitlab.com/users/sign_in"
         print("running uc_open_with_reconnect")
         driver.uc_open_with_reconnect(url, 4)
