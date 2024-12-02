@@ -1,3 +1,5 @@
+This repo defines a docker image capable of running selenium-base on AWS Lambda. 
+
 ### Initialization
 ```
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS ACCOUNT ID>.dkr.ecr.us-east-1.amazonaws.com
